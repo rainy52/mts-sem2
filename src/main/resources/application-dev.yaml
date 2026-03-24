@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    root: DEBUG
+    com.mipt.mvpmts2: DEBUG
+    org.springframework.web: INFO
+
+app:
+  environment: development
+  debug-mode: true

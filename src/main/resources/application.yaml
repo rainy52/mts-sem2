@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: task-manager-mvp
+  profiles:
+    default: dev
+
+server:
+  port: 8081
+
+app:
+  name: Task Manager MVP
+  version: 1.0.0
+  environment: base
+  debug-mode: false
+  load-default-tasks: true
+
+logging:
+  level:
+    root: INFO
+    com.mipt.mvpmts2: INFO
+  file:
+    name: logs/task-manager.log
