@@ -1,0 +1,9 @@
+com.mipt.mvpmts2
+com.mipt.mvpmts2.aspect
+com.mipt.mvpmts2.config
+com.mipt.mvpmts2.controller
+com.mipt.mvpmts2.lifecycle
+com.mipt.mvpmts2.model
+com.mipt.mvpmts2.repository
+com.mipt.mvpmts2.scope
+com.mipt.mvpmts2.service
