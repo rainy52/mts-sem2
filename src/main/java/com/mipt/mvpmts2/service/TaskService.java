@@ -1,5 +1,6 @@
 package com.mipt.mvpmts2.service;
 
+import com.mipt.mvpmts2.model.Priority;
 import com.mipt.mvpmts2.model.Task;
 import com.mipt.mvpmts2.repository.TaskRepository;
 import com.mipt.mvpmts2.scope.PrototypeScopedBean;
@@ -9,11 +10,14 @@ import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,13 +101,29 @@ public class TaskService {
     return taskFromRepository;
   }
 
+  public Task getTaskOrThrow(Long id) {
+    return getTask(id).orElseThrow(() -> new TaskNotFoundException(id));
+  }
+
+  public List<Task> getTasksByIds(Collection<Long> ids) {
+    return ids.stream()
+        .map(this::getTask)
+        .flatMap(Optional::stream)
+        .toList();
+  }
+
   public Task createTask(Task task) {
     Task taskToCreate = new Task(
         task.getId() == null ? generateTaskId() : task.getId(),
         task.getTitle(),
         task.getDescription(),
-        task.isCompleted()
+        task.isCompleted(),
+        LocalDateTime.now(),
+        task.getDueDate(),
+        task.getPriority(),
+        task.getTags()
     );
+    validateDueDate(taskToCreate);
     Task savedTask = taskRepository.save(taskToCreate);
     if (savedTask == null) {
       throw new IllegalStateException("Task repository did not return a saved task.");
@@ -114,15 +134,26 @@ public class TaskService {
   }
 
   public Task updateTask(Long id, Task task) {
-    ensureTaskExists(id);
-    Task updatedTask = taskRepository.update(new Task(id, task.getTitle(), task.getDescription(), task.isCompleted()));
+    Task existingTask = getTaskOrThrow(id);
+    Task updatedTask = new Task(
+        id,
+        task.getTitle(),
+        task.getDescription(),
+        task.isCompleted(),
+        existingTask.getCreatedAt(),
+        task.getDueDate(),
+        task.getPriority(),
+        task.getTags()
+    );
+    validateDueDate(updatedTask);
+    updatedTask = taskRepository.update(updatedTask);
     taskCache.put(updatedTask.getId(), updatedTask);
     logger.info("Updated task {}.", id);
     return updatedTask;
   }
 
   public void deleteTask(Long id) {
-    ensureTaskExists(id);
+    getTaskOrThrow(id);
     taskRepository.deleteById(id);
     taskCache.remove(id);
     logger.info("Deleted task {}.", id);
@@ -165,16 +196,19 @@ public class TaskService {
   }
 
   private void createDefaultTask(String title, String description) {
-    Task defaultTask = new Task(generateTaskId(), title, description, false);
+    Task defaultTask = new Task(
+        generateTaskId(),
+        title,
+        description,
+        false,
+        LocalDateTime.now(),
+        LocalDate.now().plusDays(7),
+        Priority.MEDIUM,
+        Set.of("default")
+    );
     Task savedTask = taskRepository.save(defaultTask);
     if (savedTask != null) {
       taskCache.put(savedTask.getId(), savedTask);
-    }
-  }
-
-  private void ensureTaskExists(Long id) {
-    if (!taskRepository.existsById(id)) {
-      throw new TaskNotFoundException(id);
     }
   }
 
@@ -186,6 +220,14 @@ public class TaskService {
     taskCache.clear();
     List<Task> safeTasks = tasks == null ? Collections.emptyList() : tasks;
     safeTasks.forEach(task -> taskCache.put(task.getId(), task));
+  }
+
+  private void validateDueDate(Task task) {
+    if (task.getDueDate() != null
+        && task.getCreatedAt() != null
+        && task.getDueDate().isBefore(task.getCreatedAt().toLocalDate())) {
+      throw new IllegalArgumentException("Due date must not be earlier than the task creation date.");
+    }
   }
 
   private long countCompleted() {

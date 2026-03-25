@@ -17,3 +17,5 @@ app:
   environment: test
   debug-mode: false
   load-default-tasks: false
+  attachments:
+    upload-dir: target/test-uploads

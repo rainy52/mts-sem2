@@ -72,6 +72,15 @@ public class InMemoryTaskRepository implements TaskRepository {
   }
 
   private Task copy(Task task) {
-    return new Task(task.getId(), task.getTitle(), task.getDescription(), task.isCompleted());
+    return new Task(
+        task.getId(),
+        task.getTitle(),
+        task.getDescription(),
+        task.isCompleted(),
+        task.getCreatedAt(),
+        task.getDueDate(),
+        task.getPriority(),
+        task.getTags()
+    );
   }
 }
