@@ -1,0 +1,21 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+server:
+  port: 0
+
+logging:
+  level:
+    root: WARN
+    com.mipt.mvpmts2: WARN
+
+app:
+  name: Task Manager MVP Test
+  version: 1.0.0-test
+  environment: test
+  debug-mode: false
+  load-default-tasks: false
+  attachments:
+    upload-dir: target/test-uploads

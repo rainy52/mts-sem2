@@ -1,0 +1,16 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: WARN
+    com.mipt.mvpmts2: INFO
+
+app:
+  environment: production
+  debug-mode: false
