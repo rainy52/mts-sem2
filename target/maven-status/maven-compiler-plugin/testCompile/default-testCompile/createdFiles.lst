@@ -1,0 +1,10 @@
+com/mipt/mvpmts2/controller/AttachmentControllerTest.class
+com/mipt/mvpmts2/MvpMts2ApplicationTests.class
+com/mipt/mvpmts2/service/FavoritesServiceTest.class
+com/mipt/mvpmts2/repository/TaskRepositoryTest.class
+com/mipt/mvpmts2/service/TaskServiceIntegrationTest.class
+com/mipt/mvpmts2/controller/FavoritesAndPreferencesControllerTest.class
+com/mipt/mvpmts2/controller/JsonTestUtils.class
+com/mipt/mvpmts2/service/AttachmentServiceTest.class
+com/mipt/mvpmts2/mapper/TaskMapperTest.class
+com/mipt/mvpmts2/controller/TaskControllerTest.class

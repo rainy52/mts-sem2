@@ -1,6 +1,7 @@
 package com.mipt.mvpmts2.service;
 
 import com.mipt.mvpmts2.dto.AttachmentResponseDto;
+import com.mipt.mvpmts2.model.Task;
 import com.mipt.mvpmts2.model.TaskAttachment;
 import com.mipt.mvpmts2.repository.TaskAttachmentRepository;
 import jakarta.annotation.PostConstruct;
@@ -58,9 +59,11 @@ public class AttachmentService {
       throw new IllegalStateException("Could not store attachment.", exception);
     }
 
+    Task task = taskService.getTaskOrThrow(taskId);
+
     TaskAttachment attachment = new TaskAttachment(
         null,
-        taskId,
+        task,
         fileName,
         storedFileName,
         file.getContentType(),

@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/**
- * Generates UUID-based task identifiers and exposes information about the prototype instance itself.
- */
 @Component
 @Scope("prototype")
 public class PrototypeScopedBean {

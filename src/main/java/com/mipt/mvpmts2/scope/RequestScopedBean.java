@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
-/**
- * Holds data for every HTTP request.
- */
 @Component
 @RequestScope
 public class RequestScopedBean {

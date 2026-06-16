@@ -26,9 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 
-/**
- * Coordinates task CRUD operations, cache lifecycle and scope-based demonstrations.
- */
 @Service
 public class TaskService {
 
@@ -42,7 +39,6 @@ public class TaskService {
   private final String environment;
   private final boolean debugMode;
   private final boolean loadDefaultTasks;
-  private final Map<Long, Task> taskCache = new ConcurrentHashMap<>();
 
   public TaskService(
       TaskRepository taskRepository,
@@ -64,41 +60,32 @@ public class TaskService {
   }
 
   @PostConstruct
-  public void initializeCache() {
-    logger.info("Initializing task cache for {} v{} in {} profile.", appName, appVersion, environment);
-    refreshCache(taskRepository.findAll());
+  public void initializeDefaultTasks() {
+    logger.info("Initializing default tasks for {} v{} in {} profile.", appName, appVersion, environment);
 
-    if (taskCache.isEmpty() && loadDefaultTasks) {
+    if (taskRepository.count() == 0 && loadDefaultTasks) {
       createDefaultTask("Prepare MVP", "Create the first task manager prototype.");
       createDefaultTask("Review Spring DI", "Verify primary and qualified repositories.");
     }
 
-    logger.info("Task cache initialized with {} task(s). Debug mode: {}", taskCache.size(), debugMode);
+    logger.info("Default tasks initialized. Debug mode: {}", debugMode);
   }
 
   @PreDestroy
   public void cleanup() {
-    logger.info("Cleaning up TaskService. {} task(s) remain in cache.", taskCache.size());
+    logger.info("Cleaning up TaskService.");
     saveStatisticsToFile();
-    taskCache.clear();
   }
 
   public List<Task> getAllTasks() {
     List<Task> tasks = taskRepository.findAll();
-    refreshCache(tasks);
     currentRequestScopedBean()
         .ifPresent(bean -> logger.info("Processing getAllTasks for request {}", bean.getRequestId()));
     return tasks;
   }
 
   public Optional<Task> getTask(Long id) {
-    Optional<Task> cachedTask = Optional.ofNullable(taskCache.get(id));
-    if (cachedTask.isPresent()) {
-      return cachedTask;
-    }
-    Optional<Task> taskFromRepository = taskRepository.findById(id);
-    taskFromRepository.ifPresent(task -> taskCache.put(task.getId(), task));
-    return taskFromRepository;
+    return taskRepository.findById(id);
   }
 
   public Task getTaskOrThrow(Long id) {
@@ -128,7 +115,6 @@ public class TaskService {
     if (savedTask == null) {
       throw new IllegalStateException("Task repository did not return a saved task.");
     }
-    taskCache.put(savedTask.getId(), savedTask);
     logger.info("Created task {}.", savedTask.getId());
     return savedTask;
   }
@@ -146,16 +132,28 @@ public class TaskService {
         task.getTags()
     );
     validateDueDate(updatedTask);
-    updatedTask = taskRepository.update(updatedTask);
-    taskCache.put(updatedTask.getId(), updatedTask);
+    updatedTask = taskRepository.save(updatedTask);
     logger.info("Updated task {}.", id);
     return updatedTask;
   }
 
+  @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRED, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED, rollbackFor = TaskNotFoundException.class)
+  public void bulkCompleteTasks(List<Long> ids) {
+    for (Long id : ids) {
+      Task task = getTaskOrThrow(id);
+      task.setCompleted(true);
+      taskRepository.save(task);
+    }
+  }
+
+  public List<Task> getTasksWithAttachments() {
+    return taskRepository.findAllWithAttachments();
+  }
+
+
   public void deleteTask(Long id) {
     getTaskOrThrow(id);
     taskRepository.deleteById(id);
-    taskCache.remove(id);
     logger.info("Deleted task {}.", id);
   }
 
@@ -165,10 +163,11 @@ public class TaskService {
 
   public CacheStatistics getCacheStatistics() {
     long completedTasks = countCompleted();
+    long totalTasks = taskRepository.count();
     return new CacheStatistics(
-        taskCache.size(),
+        (int) totalTasks,
         (int) completedTasks,
-        (int) (taskCache.size() - completedTasks)
+        (int) (totalTasks - completedTasks)
     );
   }
 
@@ -192,7 +191,6 @@ public class TaskService {
   }
 
   public void clearCacheForTesting() {
-    taskCache.clear();
   }
 
   private void createDefaultTask(String title, String description) {
@@ -206,21 +204,13 @@ public class TaskService {
         Priority.MEDIUM,
         Set.of("default")
     );
-    Task savedTask = taskRepository.save(defaultTask);
-    if (savedTask != null) {
-      taskCache.put(savedTask.getId(), savedTask);
-    }
+    taskRepository.save(defaultTask);
   }
 
   private Long generateTaskId() {
     return prototypeScopedBeanProvider.getObject().generateTaskId();
   }
 
-  private void refreshCache(List<Task> tasks) {
-    taskCache.clear();
-    List<Task> safeTasks = tasks == null ? Collections.emptyList() : tasks;
-    safeTasks.forEach(task -> taskCache.put(task.getId(), task));
-  }
 
   private void validateDueDate(Task task) {
     if (task.getDueDate() != null
@@ -231,7 +221,7 @@ public class TaskService {
   }
 
   private long countCompleted() {
-    return taskCache.values().stream()
+    return taskRepository.findAll().stream()
         .filter(Task::isCompleted)
         .count();
   }
@@ -251,7 +241,7 @@ public class TaskService {
         "version=" + appVersion,
         "environment=" + environment,
         "timestamp=" + LocalDateTime.now(),
-        "cachedTasks=" + taskCache.size()
+        "totalTasks=" + taskRepository.count()
     );
     try {
       Files.createDirectories(logDirectory);

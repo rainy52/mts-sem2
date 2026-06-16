@@ -5,7 +5,7 @@ import com.mipt.mvpmts2.dto.TaskCreateDto;
 import com.mipt.mvpmts2.dto.TaskUpdateDto;
 import com.mipt.mvpmts2.model.Priority;
 import com.mipt.mvpmts2.model.Task;
-import com.mipt.mvpmts2.repository.InMemoryTaskRepository;
+import com.mipt.mvpmts2.repository.TaskRepository;
 import com.mipt.mvpmts2.service.TaskService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,14 +40,14 @@ class TaskControllerTest {
   private ObjectMapper objectMapper;
 
   @Autowired
-  private InMemoryTaskRepository taskRepository;
+  private TaskRepository taskRepository;
 
   @Autowired
   private TaskService taskService;
 
   @BeforeEach
   void setUp() {
-    taskRepository.clear();
+    taskRepository.deleteAll();
     taskService.clearCacheForTesting();
   }
 
@@ -162,7 +162,7 @@ class TaskControllerTest {
     ));
 
     TaskUpdateDto request = new TaskUpdateDto();
-    request.setDueDate(LocalDate.now().plusDays(1));
+    request.setDueDate(LocalDate.now().minusDays(1));
 
     mockMvc.perform(put("/api/tasks/{id}", saved.getId())
             .contentType(MediaType.APPLICATION_JSON)

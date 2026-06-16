@@ -2,8 +2,8 @@ package com.mipt.mvpmts2.controller;
 
 import com.mipt.mvpmts2.model.Priority;
 import com.mipt.mvpmts2.model.Task;
-import com.mipt.mvpmts2.repository.InMemoryTaskAttachmentRepository;
-import com.mipt.mvpmts2.repository.InMemoryTaskRepository;
+import com.mipt.mvpmts2.repository.TaskAttachmentRepository;
+import com.mipt.mvpmts2.repository.TaskRepository;
 import com.mipt.mvpmts2.service.TaskService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,10 +39,10 @@ class AttachmentControllerTest {
   private MockMvc mockMvc;
 
   @Autowired
-  private InMemoryTaskRepository taskRepository;
+  private TaskRepository taskRepository;
 
   @Autowired
-  private InMemoryTaskAttachmentRepository attachmentRepository;
+  private TaskAttachmentRepository attachmentRepository;
 
   @Autowired
   private TaskService taskService;
@@ -52,8 +52,8 @@ class AttachmentControllerTest {
 
   @BeforeEach
   void setUp() throws IOException {
-    taskRepository.clear();
-    attachmentRepository.clear();
+    attachmentRepository.deleteAll();
+    taskRepository.deleteAll();
     taskService.clearCacheForTesting();
     Path uploadPath = Path.of(uploadDir);
     if (Files.exists(uploadPath)) {

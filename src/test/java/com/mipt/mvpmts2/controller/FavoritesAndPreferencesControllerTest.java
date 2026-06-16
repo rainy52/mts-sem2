@@ -2,7 +2,7 @@ package com.mipt.mvpmts2.controller;
 
 import com.mipt.mvpmts2.model.Priority;
 import com.mipt.mvpmts2.model.Task;
-import com.mipt.mvpmts2.repository.InMemoryTaskRepository;
+import com.mipt.mvpmts2.repository.TaskRepository;
 import com.mipt.mvpmts2.service.TaskService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,14 +33,14 @@ class FavoritesAndPreferencesControllerTest {
   private MockMvc mockMvc;
 
   @Autowired
-  private InMemoryTaskRepository taskRepository;
+  private TaskRepository taskRepository;
 
   @Autowired
   private TaskService taskService;
 
   @BeforeEach
   void setUp() {
-    taskRepository.clear();
+    taskRepository.deleteAll();
     taskService.clearCacheForTesting();
   }
 

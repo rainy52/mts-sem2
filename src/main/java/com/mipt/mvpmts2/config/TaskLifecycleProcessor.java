@@ -8,9 +8,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-/**
- * Logs lifecycle stages for task-related service and repository beans.
- */
 @Component
 public class TaskLifecycleProcessor implements BeanPostProcessor {
 

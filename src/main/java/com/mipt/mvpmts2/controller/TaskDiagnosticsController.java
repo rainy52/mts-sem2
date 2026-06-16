@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Exposes auxiliary endpoints used to demonstrate bean scopes, configuration and repository wiring.
- */
 @RestController
 @RequestMapping("/api/diagnostics")
 @Tag(name = "Diagnostics", description = "Auxiliary endpoints for demo and diagnostics.")

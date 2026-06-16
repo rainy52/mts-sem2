@@ -2,9 +2,6 @@ package com.mipt.mvpmts2.controller;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a standard API error.
- */
 public record ApiErrorResponse(
     LocalDateTime timestamp,
     int status,

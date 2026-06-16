@@ -1,23 +1,57 @@
 package com.mipt.mvpmts2.model;
 
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Represents a task handled by the application.
- */
+@Entity
+@Table(name = "tasks")
+@EntityListeners(AuditingEntityListener.class)
 public class Task {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "title", nullable = false)
   private String title;
+
+  @Column(name = "description", columnDefinition = "TEXT")
   private String description;
+
+  @Column(name = "completed", nullable = false)
   private boolean completed;
+
+  @CreatedDate
+  @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
+
+  @LastModifiedDate
+  @Column(name = "last_modified_date")
+  private LocalDateTime lastModifiedDate;
+
+  @Column(name = "due_date")
   private LocalDate dueDate;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "priority")
   private Priority priority;
+
+  @Convert(converter = TagsConverter.class)
+  @Column(name = "tags", columnDefinition = "TEXT")
   private Set<String> tags;
+
+  @OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+  private List<TaskAttachment> attachments = new ArrayList<>();
 
   public Task() {
     this.tags = new LinkedHashSet<>();
@@ -87,6 +121,14 @@ public class Task {
     this.createdAt = createdAt;
   }
 
+  public LocalDateTime getLastModifiedDate() {
+    return lastModifiedDate;
+  }
+
+  public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+
   public LocalDate getDueDate() {
     return dueDate;
   }
@@ -109,6 +151,14 @@ public class Task {
 
   public void setTags(Set<String> tags) {
     this.tags = tags == null ? new LinkedHashSet<>() : new LinkedHashSet<>(tags);
+  }
+
+  public List<TaskAttachment> getAttachments() {
+    return attachments;
+  }
+
+  public void setAttachments(List<TaskAttachment> attachments) {
+    this.attachments = attachments;
   }
 
   @Override
@@ -143,6 +193,7 @@ public class Task {
         + ", description='" + description + '\''
         + ", completed=" + completed
         + ", createdAt=" + createdAt
+        + ", lastModifiedDate=" + lastModifiedDate
         + ", dueDate=" + dueDate
         + ", priority=" + priority
         + ", tags=" + tags

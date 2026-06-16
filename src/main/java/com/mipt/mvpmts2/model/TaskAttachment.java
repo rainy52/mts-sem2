@@ -1,17 +1,33 @@
 package com.mipt.mvpmts2.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Metadata about a file attached to a task.
- */
+@Entity
+@Table(name = "task_attachments")
 public class TaskAttachment {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  private Long taskId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "task_id", nullable = false)
+  private Task task;
+
+  @Column(name = "file_name", nullable = false)
   private String fileName;
+
+  @Column(name = "stored_file_name", nullable = false)
   private String storedFileName;
+
+  @Column(name = "content_type")
   private String contentType;
+
+  @Column(name = "size", nullable = false)
   private long size;
+
+  @Column(name = "uploaded_at")
   private LocalDateTime uploadedAt;
 
   public TaskAttachment() {
@@ -19,14 +35,14 @@ public class TaskAttachment {
 
   public TaskAttachment(
       Long id,
-      Long taskId,
+      Task task,
       String fileName,
       String storedFileName,
       String contentType,
       long size,
       LocalDateTime uploadedAt) {
     this.id = id;
-    this.taskId = taskId;
+    this.task = task;
     this.fileName = fileName;
     this.storedFileName = storedFileName;
     this.contentType = contentType;
@@ -42,12 +58,12 @@ public class TaskAttachment {
     this.id = id;
   }
 
-  public Long getTaskId() {
-    return taskId;
+  public Task getTask() {
+    return task;
   }
 
-  public void setTaskId(Long taskId) {
-    this.taskId = taskId;
+  public void setTask(Task task) {
+    this.task = task;
   }
 
   public String getFileName() {

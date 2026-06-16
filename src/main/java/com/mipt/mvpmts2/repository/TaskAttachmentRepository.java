@@ -1,15 +1,10 @@
 package com.mipt.mvpmts2.repository;
 
 import com.mipt.mvpmts2.model.TaskAttachment;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
-import java.util.Optional;
 
-public interface TaskAttachmentRepository {
-  TaskAttachment save(TaskAttachment attachment);
-
-  Optional<TaskAttachment> findById(Long id);
-
-  List<TaskAttachment> findByTaskId(Long taskId);
-
-  void deleteById(Long id);
+public interface TaskAttachmentRepository extends JpaRepository<TaskAttachment, Long> {
+    List<TaskAttachment> findByTaskId(Long taskId);
 }
