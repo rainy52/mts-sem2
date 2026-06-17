@@ -20,9 +20,12 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+
 @Testcontainers
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class TaskRepositoryIntegrationTest {
 
     @Container
