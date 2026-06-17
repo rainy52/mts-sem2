@@ -1,5 +1,0 @@
-application=Task Manager MVP Test
-version=1.0.0-test
-environment=test
-timestamp=2026-06-16T19:40:10.904521
-totalTasks=1
